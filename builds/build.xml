@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+        Cupdater build file for Phing
+        written by Daniel Dimitrov - https://compojoom.com
+        
+        Run "phing" from the build directory to build the component, modules and plugins
+-->
+
+<project name="cupdater"  default="buildZip" basedir="../">
+    <!-- Initialize the build.date timestamp -->
+    <tstamp>
+        <format property="build.date" pattern="%Y-%m-%d" />
+    </tstamp>
+    <property name="build.version" value="1.0" />
+    <property name="plugin.name" value="cupdater" />
+    <property name="plugin.type" value="system" />
+    <property name="destination.dir"
+              value="${project.basedir}/packages/plugins/${plugin.type}/${plugin.name}-${build.version}" />
+    <mkdir dir="${destination.dir}"/>
+
+    <available resource="${project.basedir}/media/plg_${plugin.name}"
+               property="media.exist" value="yes"/>
+
+    <target name="buildZip" depends="buildPlugin">
+        <echo msg="buildZip" />
+
+        <zip destfile="${destination.dir}/../${plugin.name}-${build.version}.zip"
+             basedir="${destination.dir}" />
+    </target>
+
+    <target name="buildPlugin">
+
+        <copy todir="${destination.dir}">
+            <fileset dir="${project.basedir}/plugins/${plugin.type}/${plugin.name}"
+                     includes="**/*.*"/>
+        </copy>
+
+
+        <copy todir="${destination.dir}/administrator/language/">
+            <fileset dir="${project.basedir}/administrator/language/" >
+                <include name="**/*.plg_${plugin.type}_${plugin.name}.**" />
+            </fileset>
+        </copy>
+
+
+        <if>
+            <equals arg1="${media.exist}" arg2="yes" />
+            <then>
+                <copy todir="${destination.dir}/media/plg_${plugin.name}">
+                    <fileset dir="${project.basedir}/media/plg_${plugin.name}"
+                             includes="**/*.*"/>
+                </copy>
+            </then>
+        </if>
+
+
+        <copy file="${project.basedir}/plugins/${plugin.type}/${plugin.name}/${plugin.name}.xml"
+              tofile="${destination.dir}/${plugin.name}.xml" overwrite="true">
+            <filterchain>
+                <replacetokens begintoken="##" endtoken="##">
+                    <token key="DATE" value="${build.date}" />
+                    <token key="VERSION" value="${build.version}" />
+                </replacetokens>
+            </filterchain>
+        </copy>
+
+    </target>
+</project>
