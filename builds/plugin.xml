@@ -3,23 +3,35 @@
         Cupdater build file for Phing
         written by Daniel Dimitrov - https://compojoom.com
         
-        Run "phing" from the build directory to build the component, modules and plugins
+        Run "phing -f plugin.xml -Dbuild.version=1.0 -Dplugin.name=cupdater -Dplugin.type=system"
+        from the build directory to build the component, modules and plugins
 -->
 
-<project name="cupdater"  default="buildZip" basedir="../">
+<project name="cupdater"  default="buildZip">
     <!-- Initialize the build.date timestamp -->
     <tstamp>
         <format property="build.date" pattern="%Y-%m-%d" />
     </tstamp>
-    <property name="build.version" value="1.0" />
-    <property name="plugin.name" value="cupdater" />
-    <property name="plugin.type" value="system" />
+    <property name="dirs.root" value="${project.basedir}/../" />
+    <property name="dirs.source" value="${dirs.root}/source"/>
+
+    <property name="build.version" value="(value)" />
+    <property name="plugin.name" value="(value)" />
+    <property name="plugin.type" value="(value)" />
+
     <property name="destination.dir"
-              value="${project.basedir}/packages/plugins/${plugin.type}/${plugin.name}-${build.version}" />
+              value="${dirs.root}/packages/plugins/${plugin.type}/${plugin.name}-${build.version}" />
     <mkdir dir="${destination.dir}"/>
 
-    <available resource="${project.basedir}/media/plg_${plugin.name}"
+    <available resource="${dirs.root}/media/plg_${plugin.name}"
                property="media.exist" value="yes"/>
+
+
+    <taskdef name="extfile" classname="phingext.listJPackageFilesTask" />
+
+    <!--<target name="myecho">-->
+        <!--<myecho filesHolder="##installfiles##" />-->
+    <!--</target>-->
 
     <target name="buildZip" depends="buildPlugin">
         <echo msg="buildZip" />
@@ -31,13 +43,13 @@
     <target name="buildPlugin">
 
         <copy todir="${destination.dir}">
-            <fileset dir="${project.basedir}/plugins/${plugin.type}/${plugin.name}"
+            <fileset dir="${dirs.source}"
                      includes="**/*.*"/>
         </copy>
 
 
         <copy todir="${destination.dir}/administrator/language/">
-            <fileset dir="${project.basedir}/administrator/language/" >
+            <fileset dir="${dirs.source}/administrator/language/" >
                 <include name="**/*.plg_${plugin.type}_${plugin.name}.**" />
             </fileset>
         </copy>
@@ -47,14 +59,14 @@
             <equals arg1="${media.exist}" arg2="yes" />
             <then>
                 <copy todir="${destination.dir}/media/plg_${plugin.name}">
-                    <fileset dir="${project.basedir}/media/plg_${plugin.name}"
+                    <fileset dir="${dirs.source}/media/plg_${plugin.name}"
                              includes="**/*.*"/>
                 </copy>
             </then>
         </if>
 
 
-        <copy file="${project.basedir}/plugins/${plugin.type}/${plugin.name}/${plugin.name}.xml"
+        <copy file="${dirs.source}/${plugin.name}.xml"
               tofile="${destination.dir}/${plugin.name}.xml" overwrite="true">
             <filterchain>
                 <replacetokens begintoken="##" endtoken="##">
@@ -63,6 +75,8 @@
                 </replacetokens>
             </filterchain>
         </copy>
+
+        <extfile file="${destination.dir}/${plugin.name}.xml" sourceDir="${destination.dir}" />
 
     </target>
 </project>

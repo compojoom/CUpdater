@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="system">
+<extension version="2.5" type="plugin" group="system" method="upgrade">
     <name>plg_system_cupdater</name>
     <author>Daniel Dimitrov</author>
     <creationDate>2012-02-06</creationDate>
@@ -10,14 +10,10 @@
     <version>1.0</version>
     <description>PLG_CUPDATER_XML_DESCRIPTION</description>
     <files>
-        <filename plugin="cupdater">cupdater.php</filename>
-        <filename>index.html</filename>
+        ##PACKAGEFILESPLUGIN##
     </files>
     <languages folder="administrator/language">
-        <language tag="en-GB">en-GB/en-GB.plg_system_cupdater.ini</language>
-        <language tag="en-GB">en-GB/en-GB.plg_system_cupdater.sys.ini</language>
-        <language tag="de-DE">de-DE/de-DE.plg_system_cupdater.ini</language>
-        <language tag="de-DE">de-DE/de-DE.plg_system_cupdater.sys.ini</language>
+        ##ADMINLANGUAGEFILES##
     </languages>
     <config>
         <fields name="params">
