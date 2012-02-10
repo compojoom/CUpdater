@@ -4,13 +4,13 @@ lang_map = af_ZA: af-ZA, am_ET: am-ET, ar_AE: ar-AE, ar_BH: ar-BH, ar_DZ: ar-DZ,
 type = INI
 
 [compojoom-cupdater.plg_system_cupdater]
-file_filter = administrator\language\<lang>\<lang>.plg_system_cupdater.ini
-source_file = administrator\language\en-GB\en-GB.plg_system_cupdater.ini
+file_filter = source\administrator\language\<lang>\<lang>.plg_system_cupdater.ini
+source_file = source\administrator\language\en-GB\en-GB.plg_system_cupdater.ini
 source_lang = en_GB
 minimum_perc = 100
 
 [compojoom-cupdater.plg_system_cupdater_sys]
-file_filter = administrator\language\<lang>\<lang>.plg_system_cupdater.sys.ini
-source_file = administrator\language\en-GB\en-GB.plg_system_cupdater.sys.ini
+file_filter = source\administrator\language\<lang>\<lang>.plg_system_cupdater.sys.ini
+source_file = source\administrator\language\en-GB\en-GB.plg_system_cupdater.sys.ini
 source_lang = en_GB
 minimum_perc = 100
