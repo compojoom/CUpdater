@@ -39,11 +39,11 @@
                         label="PLG_CUPDATER_NOTIFICATION_PERIOD_LABEL"
                         description="">
                     <option value="24">PLG_CUPDATER_DAILY</option>
-                    <option	value="168">PLG_CUPDATER_WEEKLY</option>
-                    <option	value="336">PLG_CUPDATER_HALF_MONTHLY</option>
-                    <option	value="672">PLG_CUPDATER_MONTHLY</option>
+                    <option value="168">PLG_CUPDATER_WEEKLY</option>
+                    <option value="336">PLG_CUPDATER_HALF_MONTHLY</option>
+                    <option value="672">PLG_CUPDATER_MONTHLY</option>
                 </field>
-				<field name="mailto_noresult" type="radio" default="1"
+		<field name="mailto_noresult" type="radio" default="1"
                        label="PLG_CUPDATER_MAILTO_NORESULT"
                        description="PLG_CUPDATER_MAILTO_NORESULT_DESC">
                     <option value="1">JYES</option>
@@ -52,10 +52,7 @@
             </fieldset>
         </fields>
     </config>
-
-
     <updateservers>
         <server type="plugin" priority="1" name="Updates for CUpdater"><![CDATA[https://compojoom.com/index.php?option=com_ars&view=update&task=stream&format=xml&id=8]]></server>
     </updateservers>
-
 </extension>

@@ -33,7 +33,7 @@ class plgSystemCupdater extends JPlugin
             return false;
         }
 
-//      so we are running??? Then let us load some languages
+        //      so we are running??? Then let us load some languages
         $lang = & JFactory::getLanguage();
         $lang->load('plg_system_cupdater', JPATH_ADMINISTRATOR, 'en-GB', true);
         $lang->load('plg_system_cupdater', JPATH_ADMINISTRATOR, $lang->getDefault(), true);
@@ -174,7 +174,7 @@ class plgSystemCupdater extends JPlugin
     private function checkForUpdates()
     {
         $updater = JUpdater::getInstance();
-        $updater->findUpdates(0, 0);
+        $updater->findUpdates(0, 0); // BREAKPOINT
 
         $db = JFactory::getDbo();
         $query = $db->getQuery(true);
@@ -224,7 +224,7 @@ class plgSystemCupdater extends JPlugin
         $query->set('params = ' . $db->Quote($data));
         $query->where('element = "cupdater" AND type = "plugin"');
         $db->setQuery($query);
-        $db->query();
+        $db->execute();
     }
 
     /**
