@@ -1,82 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-        Cupdater build file for Phing
-        written by Daniel Dimitrov - https://compojoom.com
-        
-        Run "phing -f plugin.xml -Dbuild.version=1.0 -Dplugin.name=cupdater -Dplugin.type=system"
-        from the build directory to build the component, modules and plugins
+    Generic build plugin
+    ${plugin} should be mod_something...
 -->
 
-<project name="cupdater"  default="buildZip">
-    <!-- Initialize the build.date timestamp -->
-    <tstamp>
-        <format property="build.date" pattern="%Y-%m-%d" />
-    </tstamp>
-    <property name="dirs.root" value="${project.basedir}/../" />
-    <property name="dirs.source" value="${dirs.root}/source"/>
+<project name="plugin" default="buildPlugin">
 
-    <property name="build.version" value="(value)" />
-    <property name="plugin.name" value="(value)" />
-    <property name="plugin.type" value="(value)" />
+    <target name="buildPluginZip" depends="buildPlugin">
 
-    <property name="destination.dir"
-              value="${dirs.root}/packages/plugins/${plugin.type}/${plugin.name}-${build.version}" />
-    <mkdir dir="${destination.dir}"/>
+        <echo message="${destination.dir}/plugins/${pluginType}/${pluginName}/-${build.version}" />
+        <zip destfile="${destination.dir}/${pluginName}-${build.version}.zip"
+             basedir="${destination.dir}/plugins/${pluginType}/${pluginName}/"/>
 
-    <available resource="${dirs.root}/media/plg_${plugin.name}"
-               property="media.exist" value="yes"/>
-
-
-    <taskdef name="extfile" classname="phingext.listJPackageFilesTask" />
-
-    <!--<target name="myecho">-->
-        <!--<myecho filesHolder="##installfiles##" />-->
-    <!--</target>-->
-
-    <target name="buildZip" depends="buildPlugin">
-        <echo msg="buildZip" />
-
-        <zip destfile="${destination.dir}/../${plugin.name}-${build.version}.zip"
-             basedir="${destination.dir}" />
     </target>
 
     <target name="buildPlugin">
+        <explode propertyName="pluginType" string="${plugin}" delimiter="_" key="1" />
+        <explode propertyName="pluginName" string="${plugin}" delimiter="_" key="2" />
 
-        <copy todir="${destination.dir}">
-            <fileset dir="${dirs.source}"
-                     includes="**/*.*"/>
-        </copy>
-
-
-        <copy todir="${destination.dir}/administrator/language/">
-            <fileset dir="${dirs.source}/administrator/language/" >
-                <include name="**/*.plg_${plugin.type}_${plugin.name}.**" />
-            </fileset>
-        </copy>
-
+        <!--do we have a media folder?-->
+        <available file="${dirs.source}\media\${plugin}"
+                   type="dir" property="mod.media.exist" value="yes"/>
+        <available file="${dirs.source}\administrator\language\"
+                   type="dir" property="adminLang.exist" value="yes"/>
 
         <if>
-            <equals arg1="${media.exist}" arg2="yes" />
+            <equals arg1="${adminLang.exist}" arg2="1"/>
             <then>
-                <copy todir="${destination.dir}/media/plg_${plugin.name}">
-                    <fileset dir="${dirs.source}/media/plg_${plugin.name}"
-                             includes="**/*.*"/>
+                <copy todir="${destination.dir}/plugins/${pluginType}/${pluginName}/administrator/language/">
+                    <fileset dir="${dirs.source}/administrator/language/">
+                        <include name="**/*.${plugin}.**"/>
+                    </fileset>
                 </copy>
             </then>
         </if>
 
+        <copy todir="${destination.dir}/plugins/${pluginType}/${pluginName}">
+            <fileset dir="${dirs.source}/plugins/${pluginType}/${pluginName}" includes="**/*.*"/>
+        </copy>
 
-        <copy file="${dirs.source}/${plugin.name}.xml"
-              tofile="${destination.dir}/${plugin.name}.xml" overwrite="true">
+        <if>
+            <equals arg1="${mod.media.exist}" arg2="1"/>
+            <then>
+                <copy todir="${destination.dir}/modules/${pluginType}/${pluginName}/media/${plugin}">
+                    <fileset dir="${dirs.source}/media/${plugin}">
+                        <include name="**/*.*"/>
+                        <exclude name="kml/*.*"/>
+                    </fileset>
+                </copy>
+            </then>
+        </if>
+
+        <copy file="${dirs.source}/plugins/${pluginType}/${pluginName}/${pluginName}.xml"
+              tofile="${destination.dir}/plugins/${pluginType}/${pluginName}/${pluginName}.xml" overwrite="true">
+
             <filterchain>
-                <replacetokens begintoken="##" endtoken="##">
-                    <token key="DATE" value="${build.date}" />
-                    <token key="VERSION" value="${build.version}" />
+
+                <replacetokens begintoken="@@" endtoken="@@">
+                    <token key="DATE" value="${build.date}"/>
+                    <token key="VERSION" value="${build.version}"/>
+                    <token key="PLUGINNAME" value="${plugin}"/>
                 </replacetokens>
             </filterchain>
         </copy>
 
-        <extfile file="${destination.dir}/${plugin.name}.xml" sourceDir="${destination.dir}" />
+        <extfile file="${destination.dir}/plugins/${pluginType}/${pluginName}/${pluginName}.xml"
+                 sourceDir="${dirs.source}/plugins/${pluginType}/${pluginName}"
+                 component="${plugin}"
+                 type="plugin"
+                />
 
     </target>
+
 </project>

@@ -2,7 +2,7 @@
 
 /**
  * @author Daniel Dimitrov <daniel@compojoom.com>
- * @copyright    Copyright (C) 2008 - 2012 compojoom.com. All rights reserved.
+ * @copyright    Copyright (C) 2008 - 2013 compojoom.com. All rights reserved.
  * @license        GNU General Public License version 2 or later
  */
 
@@ -34,45 +34,63 @@ class plgSystemCupdater extends JPlugin
         }
 
 //      so we are running??? Then let us load some languages
-        $lang = & JFactory::getLanguage();
+        $lang = JFactory::getLanguage();
         $lang->load('plg_system_cupdater', JPATH_ADMINISTRATOR, 'en-GB', true);
         $lang->load('plg_system_cupdater', JPATH_ADMINISTRATOR, $lang->getDefault(), true);
         $lang->load('plg_system_cupdater', JPATH_ADMINISTRATOR, null, true);
 
 
-        //      clear the cache - otherwise we get problems in backend
+        // clear the cache - otherwise we get problems in backend
         $cache = JFactory::getCache();
         $cache->clean('com_plugins');
 
-        //      now check for updates
-        $updates = $this->checkForUpdates();
+		// note for Joomla 3
+		// the JHttpTransportCurl class is throwing an exception when it is unable to get the content out
+		// of an url. The exception is not caught in the Joomla updater class and this leads to a nasty
+		// exception thrown out at the user. That is why we catch it here and send an email to the
+		// people that should be notified about that
+		// normally joomla should disable such urls, but since they don't react on the Exception this will
+		// happen each time the update script is run
+		// that is why the administrator will need to find the url causing the problem and disable it for the server
+		try {
+			$updates = $this->checkForUpdates();
+		} catch (UnexpectedValueException $e) {
+			// let us send a mail to the user
+			$title = JText::_('PLG_CUPDATER_ERROR_UPDATE');
+			$body = JText::_('PLG_CUPDATER_ERROR_UPDATE_DESC');
+			$body .= "\n" . JText::_('PLG_CUPDATER_DISCLAIMER') . "\n";
+			$this->sendMail($title, $body);
+			$this->setLastRunTimestamp();
+			// and exit...
+			return false;
+		}
 
         if (count($updates)) {
             if (count($updates) == 1) {
-                $title = JText::_('CUPDATER_FOUND_ONE_UPDATE');
+                $title = JText::_('PLG_CUPDATER_FOUND_ONE_UPDATE');
             } else {
-                $title = JText::sprintf('CUPDATER_FOUND_UPDATES', count($updates));
+                $title = JText::sprintf('PLG_CUPDATER_FOUND_UPDATES', count($updates));
             }
 
             $body = '';
             foreach ($updates as $value) {
-                $body .= JText::_('CUPDATER_UPDATE_FOR') . ': '
-                    . $value->name . ' ' . JText::_('CUPDATER_VERSION') . ': '
-                    . $value->version . ' ' . JText::_('CUPDATER_FOUND') . "\n";
+                $body .= JText::_('PLG_CUPDATER_UPDATE_FOR') . ': '
+                    . $value->name . ' ' . JText::_('PLG_CUPDATER_VERSION') . ': '
+                    . $value->version . ' ' . JText::_('PLG_CUPDATER_FOUND') . "\n";
             }
-            $body .= "\n" . JText::_('CUPDATER_TO_APPLY_UPDATE') . ': '
-                . JURI::base() . ' ' . JText::_('CUPDATER_AND_GO_TO') . "\n";
+            $body .= "\n" . JText::_('PLG_CUPDATER_TO_APPLY_UPDATE') . ': '
+                . JURI::base() . ' ' . JText::_('PLG_CUPDATER_AND_GO_TO') . "\n";
 
         } else if ((!count($updates)) && (($this->params->get('mailto_noresult') == 0))) {
-            $title = JText::_('CUPDATER_FOUND_NO_UPDATE_TITLE');
-            $body = JText::_('CUPDATER_FOUND_NO_UPDATE') . ' ' . JURI::base() . "\n";
+            $title = JText::_('PLG_CUPDATER_FOUND_NO_UPDATE_TITLE');
+            $body = JText::_('PLG_CUPDATER_FOUND_NO_UPDATE') . ' ' . JURI::base() . "\n";
         }
 
         if (count($updates) ||
             ((!count($updates)) && (($this->params->get('mailto_noresult') == 0)))) {
 
             $body .= $this->nextUpdateText();
-            $body .= "\n" . JText::_('CUPDATER_DISCLAIMER') . "\n";
+            $body .= "\n" . JText::_('PLG_CUPDATER_DISCLAIMER') . "\n";
 
             $this->sendMail($title, $body);
         }
@@ -87,20 +105,20 @@ class plgSystemCupdater extends JPlugin
      */
     private function nextUpdateText()
     {
-        $body = JText::_("CUPDATER_NEXT_UPDATE_CHECK_WILL_BE") . ' ';
+        $body = JText::_("PLG_CUPDATER_NEXT_UPDATE_CHECK_WILL_BE") . ' ';
 
         switch ($this->params->get('notification_period')) {
             case "24":
-                $body .= JText::_('CUPDATER_TOMORROW') . '.';
+                $body .= JText::_('PLG_CUPDATER_TOMORROW') . '.';
                 break;
             case "168":
-                $body .= JText::_('CUPDATER_IN_ONE_WEEK') . '.';
+                $body .= JText::_('PLG_CUPDATER_IN_ONE_WEEK') . '.';
                 break;
             case "336":
-                $body .= JText::sprintf('CUPDATER_IN_WEEKS', 2) . '.';
+                $body .= JText::sprintf('PLG_CUPDATER_IN_WEEKS', 2) . '.';
                 break;
             case "672":
-                $body .= JText::sprintf('CUPDATER_WEEKS', 4) . '.';
+                $body .= JText::sprintf('PLG_CUPDATER_WEEKS', 4) . '.';
                 break;
         }
 
@@ -173,6 +191,7 @@ class plgSystemCupdater extends JPlugin
      */
     private function checkForUpdates()
     {
+        jimport('joomla.updater.updater');
         $updater = JUpdater::getInstance();
         $updater->findUpdates(0, 0);
 
@@ -216,7 +235,7 @@ class plgSystemCupdater extends JPlugin
         $params = $this->params;
         $params->set('plg_cupdate_timestamp', $lastRun);
 
-        $db =& JFactory::getDBO();
+        $db = JFactory::getDBO();
 
         $data = $params->toString('JSON');
         $query = $db->getQuery(true);

@@ -1,0 +1,9 @@
+build.version=dev
+plugins=plg_system_cupdater
+; FTP Options
+ftp.host=
+ftp.port=21
+ftp.username=
+ftp.password=
+ftp.dir=
+ftp.mode=binary
